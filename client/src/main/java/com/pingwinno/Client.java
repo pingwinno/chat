@@ -26,23 +26,28 @@ public class Client {
         this.messageHandler = new MessageHandler(username, Ansi.Color.values()[new Random().nextInt(0, Ansi.Color.values().length)]);
     }
 
-    @SneakyThrows
+
     public void start() {
         new Thread(this::handleConsoleInput).start();
         log.info("initialize client");
-        clientSocket = new Socket(serverHost, serverPort);
-        inputMessagesStream = new Scanner(clientSocket.getInputStream());
-        outputMessagesStream = new PrintWriter(clientSocket.getOutputStream());
-        new Thread(() -> {
-            log.debug("start incoming message loop");
-            //start incoming message loop
-            while (clientSocket != null) {
-                if (inputMessagesStream.hasNext()) {
-                    String inMes = inputMessagesStream.nextLine();
-                    System.out.println(messageHandler.renderMessage(inMes));
+        try {
+            clientSocket = new Socket(serverHost, serverPort);
+            inputMessagesStream = new Scanner(clientSocket.getInputStream());
+            outputMessagesStream = new PrintWriter(clientSocket.getOutputStream());
+            new Thread(() -> {
+                log.debug("start incoming message loop");
+                //start incoming message loop
+                while (clientSocket != null) {
+                    if (inputMessagesStream.hasNext()) {
+                        String inMes = inputMessagesStream.nextLine();
+                        System.out.println(messageHandler.renderMessage(inMes));
+                    }
                 }
-            }
-        }).start();
+            }).start();
+        } catch (IOException e) {
+            log.error("Error during communication with server. Closing client...\n", e);
+            this.close();
+        }
     }
 
     public void sendMessage(String message) {
@@ -72,10 +77,10 @@ public class Client {
         }
     }
 
-
-    public void close() throws IOException {
-        clientSocket.close();
+    @SneakyThrows
+    public void close() {
         outputMessagesStream.close();
         inputMessagesStream.close();
+        clientSocket.close();
     }
 }

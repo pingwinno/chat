@@ -7,7 +7,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Random;
 
 import static org.fusesource.jansi.Ansi.Color;
 import static org.fusesource.jansi.Ansi.ansi;
@@ -28,7 +27,7 @@ public class MessageHandler {
     }
 
     @SneakyThrows
-    public String makeMessage(String message,LocalDateTime time) {
+    public String makeMessage(String message, LocalDateTime time) {
         return mapper.writeValueAsString(
                 MessageModel.builder()
                         .message(message)
